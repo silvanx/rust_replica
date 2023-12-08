@@ -88,4 +88,18 @@ impl Deck {
     pub fn stop_cards_left(&self) -> u8 {
         self.stop_cards
     }
+
+    pub fn draw(&mut self, how_many: u8) -> Vec<DeckCard> {
+        let mut new_cards= vec![];
+        let how_many = how_many as usize;
+        while new_cards.len() < how_many {
+            let card = self.cards.pop();
+            match card {
+                Some(card) => new_cards.push(card),
+                None => return new_cards,
+            }
+        }
+        new_cards
+    }
+
 }

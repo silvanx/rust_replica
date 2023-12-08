@@ -42,4 +42,21 @@ mod tests {
         assert_eq!(deck.cards_left(), 6);
         assert_eq!(deck.stop_cards_left(), 1);
     }
+
+    #[test]
+    fn draw_two_cards() {
+        let cards: Vec<DeckCard> = vec![
+            DeckCard::ActionCard(ActionCard::new (ActionType::Mutation)),
+            DeckCard::ActionCard(ActionCard::new (ActionType::Stop)),
+            DeckCard::BaseCard(BaseCard::new (CardColor::Blue, CardValue::Cytosine)),
+            DeckCard::BaseCard(BaseCard::new (CardColor::Blue, CardValue::Adenine)),
+            DeckCard::BaseCard(BaseCard::new (CardColor::Blue, CardValue::Adenine)),
+            DeckCard::BaseCard(BaseCard::new (CardColor::Green, CardValue::Guanine)),
+        ];
+        let mut deck = Deck::from_vec(cards);
+
+        let new_cards = deck.draw(2);
+        assert_eq!(new_cards.len(), 2);
+        assert_eq!(deck.cards_left(), 4);
+    }
 }
