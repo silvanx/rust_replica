@@ -156,4 +156,15 @@ impl Deck {
         new_cards
     }
 
+    pub fn replace(&mut self, card: DeckCard) {
+        if is_stop_card(&card) {
+            self.stop_cards += 1;
+        }
+        self.cards.push(card);
+    }
+
+    pub fn shuffle(&mut self) {
+        // todo
+    }
+
 }

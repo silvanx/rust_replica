@@ -89,4 +89,27 @@ mod tests {
         assert_eq!(new_cards.len(), 6);
         assert_eq!(deck.cards_left(), 0);
     }
+
+    #[test]
+    fn replace_card_into_deck() {
+        let mut deck = create_example_deck();
+        let new_card = DeckCard::ActionCard(ActionCard::new(ActionType::Mutation));
+        deck.replace(new_card);
+        assert_eq!(deck.cards_left(), 7);
+        assert_eq!(deck.stop_cards_left(), 1);
+        if let Some(top_card) = deck.draw(1).get(0) {
+            let card_description = format!("{}", top_card);
+            assert_eq!(String::from("Action Mutation"), card_description);
+        } else {
+            panic!("Could not draw replaced card!");
+        }
+    }
+
+    #[test]
+    fn replace_stop_card_into_deck() {
+        let mut deck = create_example_deck();
+        let new_card = DeckCard::ActionCard(ActionCard::new(ActionType::Stop));
+        deck.replace(new_card);
+        assert_eq!(deck.stop_cards_left(), 2);
+    }
 }
