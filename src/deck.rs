@@ -164,7 +164,9 @@ impl Deck {
     }
 
     pub fn shuffle(&mut self) {
-        // todo
+        use rand::seq::SliceRandom;
+        let mut rng = rand::thread_rng();
+        self.cards.shuffle(&mut rng);
     }
 
 }

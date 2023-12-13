@@ -21,6 +21,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::format;
     use crate::deck::{ActionCard, ActionType, BaseCard, CardColor, CardValue, Deck, DeckCard, is_stop_card};
 
     fn create_example_deck() -> Deck {
@@ -111,5 +112,39 @@ mod tests {
         let new_card = DeckCard::ActionCard(ActionCard::new(ActionType::Stop));
         deck.replace(new_card);
         assert_eq!(deck.stop_cards_left(), 2);
+    }
+
+    #[test]
+    fn shuffle_deck() {
+        let mut deck = create_example_deck();
+        let new_card = DeckCard::BaseCard(BaseCard::new (CardColor::Yellow, CardValue::Adenine));
+        deck.replace(new_card);
+        deck.shuffle();
+        // TODO: Test the randomness more robustly; shuffling the deck once could still result in the last card staying
+        //       where it was...
+        let card_description = format!("{}", deck.draw(1).get(0).unwrap());
+        assert_eq!(deck.cards_left(), 6);
+        assert_ne!(card_description, "Base Yellow A");
+    }
+
+    #[test]
+    fn shuffle_two_decks() {
+        // TODO: Write a more robust test (this will sometimes fail)
+        let mut deck1 = create_example_deck();
+        let mut deck2 = create_example_deck();
+        deck1.shuffle();
+        deck2.shuffle();
+        let mut all_cards_identical = true;
+        while let card = deck1.draw(1).get(0) {
+            if card.is_some() &&
+                (format!("{}", card.unwrap()) != format!("{}", deck2.draw(1).get(0).unwrap())) {
+                all_cards_identical = false;
+            } else {
+                break;
+            }
+        }
+        if all_cards_identical {
+            panic!("Two decks shuffled separately result in identical order")
+        }
     }
 }
