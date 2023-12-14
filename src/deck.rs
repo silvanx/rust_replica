@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::Formatter;
 
+#[derive(PartialEq)]
 pub enum CardColor {
     Blue,
     Red,
@@ -61,8 +62,8 @@ impl ActionCard {
 }
 
 pub struct BaseCard {
-    color: CardColor,
-    value: CardValue
+    pub color: CardColor,
+    pub value: CardValue
 }
 
 impl BaseCard {
@@ -173,7 +174,6 @@ impl Deck {
 
 #[cfg(test)]
 mod tests {
-    use std::fmt::format;
     use crate::deck::{ActionCard, ActionType, BaseCard, CardColor, CardValue, Deck, DeckCard, is_stop_card};
 
     fn create_example_deck() -> Deck {
