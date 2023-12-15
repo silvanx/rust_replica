@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Formatter;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum CardColor {
     Blue,
     Red,
@@ -21,6 +21,7 @@ impl fmt::Display for CardColor {
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum CardValue {
     Adenine,
     ThymineUracil,
@@ -40,6 +41,7 @@ impl fmt::Display for CardValue {
     }
 }
 
+#[derive(Copy, Clone)]
 pub enum ActionType {
     Stop,
     Mutation,
@@ -61,6 +63,7 @@ impl ActionCard {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct BaseCard {
     pub color: CardColor,
     pub value: CardValue
@@ -72,10 +75,12 @@ impl BaseCard {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct ActionCard {
     action: ActionType,
 }
 
+#[derive(Copy, Clone)]
 pub enum DeckCard {
     ActionCard(ActionCard),
     BaseCard(BaseCard),
@@ -91,13 +96,23 @@ impl fmt::Display for DeckCard {
     }
 }
 
-pub fn is_stop_card(card: &DeckCard) -> bool {
-    match card {
-        DeckCard::ActionCard(action_card) => match action_card.action {
-            ActionType::Stop => true,
-            ActionType::Mutation => false
-        },
-        DeckCard::BaseCard(_) => false
+impl DeckCard {
+    pub fn is_stop_card(&self) -> bool {
+        match self {
+            DeckCard::ActionCard(action_card) => match action_card.action {
+                ActionType::Stop => true,
+                ActionType::Mutation => false
+            },
+            DeckCard::BaseCard(_) => false
+        }
+    }
+
+    pub fn is_base_card(&self) -> bool {
+        if let DeckCard::BaseCard(_) = self {
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -120,7 +135,7 @@ impl Deck {
         let size = &cards.len();
         let stop_cards = &cards
             .iter()
-            .filter(|c| is_stop_card(c))
+            .filter(|c| c.is_stop_card())
             .count();
         Deck {
             cards: cards,
@@ -145,7 +160,7 @@ impl Deck {
             let card = self.cards.pop();
             match card {
                 Some(c) => {
-                    if is_stop_card(&c) {
+                    if c.is_stop_card() {
                         stop_cards_drawn += 1;
                     }
                     new_cards.push(c);
@@ -158,7 +173,7 @@ impl Deck {
     }
 
     pub fn replace(&mut self, card: DeckCard) {
-        if is_stop_card(&card) {
+        if card.is_stop_card() {
             self.stop_cards += 1;
         }
         self.cards.push(card);
@@ -174,7 +189,7 @@ impl Deck {
 
 #[cfg(test)]
 mod tests {
-    use crate::deck::{ActionCard, ActionType, BaseCard, CardColor, CardValue, Deck, DeckCard, is_stop_card};
+    use crate::deck::{ActionCard, ActionType, BaseCard, CardColor, CardValue, Deck, DeckCard};
 
     fn create_example_deck() -> Deck {
         let cards: Vec<DeckCard> = vec![
@@ -201,9 +216,9 @@ mod tests {
             DeckCard::ActionCard(ActionCard::new (ActionType::Stop)),
             DeckCard::ActionCard(ActionCard::new (ActionType::Mutation)),
         ];
-        assert!(!crate::deck::is_stop_card(&cards[0]));
-        assert!(crate::deck::is_stop_card(&cards[1]));
-        assert!(!crate::deck::is_stop_card(&cards[2]));
+        assert!(!cards[0].is_stop_card());
+        assert!(cards[1].is_stop_card());
+        assert!(!cards[2].is_stop_card());
     }
 
     #[test]
@@ -228,7 +243,7 @@ mod tests {
         let new_cards = deck.draw(2);
         let stop_cards_in_hand = new_cards
             .iter()
-            .filter(|c| is_stop_card(c))
+            .filter(|c| c.is_stop_card())
             .count() as u8;
         assert_eq!(deck.stop_cards_left(), 0);
         assert_eq!(deck.cards_left(), 4);
