@@ -2,6 +2,7 @@ use crate::deck::{ActionCard, ActionType, BaseCard, CardColor, CardValue, DeckCa
 
 mod deck;
 mod player;
+mod game;
 
 fn main() {
     let cards: Vec<DeckCard> = vec![
