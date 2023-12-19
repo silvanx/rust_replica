@@ -7,7 +7,7 @@ pub struct Player {
     hand: Vec<DeckCard>,
     collected_cards: Vec<DeckCard>,
     tokens_collected: u8,
-    color: CardColor,
+    pub color: CardColor,
 }
 
 impl Player {
