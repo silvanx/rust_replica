@@ -129,10 +129,15 @@ fn main() {
     ];
     let mut deck = deck::Deck::from_vec(cards);
     deck.shuffle();
-    println!("Created deck with {} cards", deck.cards_left());
-    let cards = deck.draw(3);
-    println!("Top three cards:");
-    for card in cards.iter() {
-        println!("{}", card);
+    println!("Starting a 2-player game...");
+    let new_game = game::Game::new(2, deck);
+    if new_game.is_err() {
+        println!("Error creating new game: {}", new_game.err().unwrap());
+        std::process::exit(1);
     }
+    let mut game = new_game.unwrap();
+    println!("Game created.");
+    println!("Players: {}", game.num_players);
+    println!("Cards left in deck: {}", game.deck.cards_left());
+
 }

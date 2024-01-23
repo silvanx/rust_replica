@@ -3,7 +3,7 @@ use std::fmt;
 use std::fmt::Formatter;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
-use crate::deck::{CardColor, DeckCard};
+use crate::deck::{CardColor, Deck, DeckCard};
 use crate::player::Player;
 
 const STOP_CARDS_IN_DECK: u8 = 10;
@@ -23,12 +23,12 @@ pub struct Game {
     pub players: Vec<Player>,
     stopped_cells: u8,
     stop_cards_played: u8,
-    deck: Vec<DeckCard>,
-    revealed_cards: Vec<DeckCard>,
-    dna: Vec<CardPair>,
+    pub deck: Deck,
+    pub revealed_cards: Vec<DeckCard>,
+    pub dna: Vec<CardPair>,
 }
 
-struct WrongNumberPlayersError;
+pub struct WrongNumberPlayersError;
 
 impl fmt::Display for WrongNumberPlayersError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -43,7 +43,10 @@ impl fmt::Debug for WrongNumberPlayersError {
 }
 
 impl Game {
-    fn new(num_players: u8) -> Result<Game, WrongNumberPlayersError> {
+    pub fn new(
+        num_players: u8,
+        deck: Deck,
+    ) -> Result<Game, WrongNumberPlayersError> {
         if num_players < MIN_PLAYERS || num_players > MAX_PLAYERS {
             return Err(WrongNumberPlayersError)
         }
@@ -58,14 +61,14 @@ impl Game {
             players: players,
             stopped_cells: 0,
             stop_cards_played: 0,
-            deck: vec![],
+            deck: deck,
             revealed_cards: vec![],
             dna: vec![],
         };
         Ok(game)
     }
 
-    fn is_over(&self) -> bool {
+    pub fn is_over(&self) -> bool {
         if self.num_players == 2 && self.stopped_cells >= MAX_CELLS_2_PLAYERS {
             true
         } else if self.num_players == 3 && self.stopped_cells >= MAX_CELLS_3_PLAYERS {
@@ -73,21 +76,21 @@ impl Game {
         } else if self.num_players == 4 && self.stopped_cells >= MAX_CELLS_4_PLAYERS {
             true
         } else {
-            self.deck.is_empty() || self.stop_cards_played >= STOP_CARDS_IN_DECK
+            self.deck.cards_left() < 1 || self.stop_cards_played >= STOP_CARDS_IN_DECK
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::deck::{ActionType, CardColor, DeckCard};
+    use crate::deck::{ActionType, CardColor, Deck, DeckCard};
     use crate::player::Player;
     use crate::game::{Game, MAX_CELLS_2_PLAYERS, MAX_CELLS_3_PLAYERS, MAX_CELLS_4_PLAYERS, STOP_CARDS_IN_DECK, MIN_PLAYERS, MAX_PLAYERS};
 
     #[test]
     fn game_new() {
         let num_players: u8 = 2;
-        let game = Game::new(num_players);
+        let game = Game::new(num_players, Deck::from_vec(vec![]));
         assert!(game.is_ok());
         let game = game.unwrap();
         assert_eq!(game.num_players, 2);
@@ -98,8 +101,8 @@ mod test {
 
     #[test]
     fn game_new_wrong_number_of_players() {
-        assert!(Game::new(MIN_PLAYERS - 1).is_err());
-        assert!(Game::new(MAX_PLAYERS + 1).is_err());
+        assert!(Game::new(MIN_PLAYERS - 1, Deck::from_vec(vec![])).is_err());
+        assert!(Game::new(MAX_PLAYERS + 1, Deck::from_vec(vec![])).is_err());
     }
 
     #[test]
@@ -112,9 +115,9 @@ mod test {
             ],
             stopped_cells: 0,
             stop_cards_played: 0,
-            deck: vec![
+            deck: Deck::from_vec(vec![
                 DeckCard::ActionCard(crate::deck::ActionCard::new (ActionType::Mutation))
-            ],
+            ]),
             revealed_cards: vec![],
             dna: vec![],
         };
@@ -131,7 +134,7 @@ mod test {
             ],
             stopped_cells: 2,
             stop_cards_played: 2,
-            deck: vec![],
+            deck: Deck::from_vec(vec![]),
             revealed_cards: vec![],
             dna: vec![],
         };
@@ -148,9 +151,9 @@ mod test {
             ],
             stopped_cells: 2,
             stop_cards_played: STOP_CARDS_IN_DECK,
-            deck: vec![
+            deck: Deck::from_vec(vec![
                 DeckCard::ActionCard(crate::deck::ActionCard::new (ActionType::Mutation))
-            ],
+            ]),
             revealed_cards: vec![],
             dna: vec![],
         };
@@ -168,9 +171,9 @@ mod test {
             ],
             stopped_cells: MAX_CELLS_2_PLAYERS,
             stop_cards_played: 0,
-            deck: vec![
+            deck: Deck::from_vec(vec![
                 DeckCard::ActionCard(crate::deck::ActionCard::new (ActionType::Mutation))
-            ],
+            ]),
             revealed_cards: vec![],
             dna: vec![],
         };
@@ -189,9 +192,9 @@ mod test {
             ],
             stopped_cells: MAX_CELLS_3_PLAYERS,
             stop_cards_played: 0,
-            deck: vec![
+            deck: Deck::from_vec(vec![
                 DeckCard::ActionCard(crate::deck::ActionCard::new (ActionType::Mutation))
-            ],
+            ]),
             revealed_cards: vec![],
             dna: vec![],
         };
@@ -211,9 +214,9 @@ mod test {
             ],
             stopped_cells: MAX_CELLS_4_PLAYERS,
             stop_cards_played: 0,
-            deck: vec![
+            deck: Deck::from_vec(vec![
                 DeckCard::ActionCard(crate::deck::ActionCard::new (ActionType::Mutation))
-            ],
+            ]),
             revealed_cards: vec![],
             dna: vec![],
         };
